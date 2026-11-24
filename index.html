@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Color Grading Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10131b;color:white;font-family:Arial,sans-serif;padding:22px}
+h1{color:#8b9cff}
+.card{background:#1d2331;padding:20px;border-radius:16px;margin-top:18px}
+button{background:#687cff;color:white;border:0;padding:13px;border-radius:10px;font-weight:bold;width:100%;margin-top:12px}
+input{margin-top:15px;width:100%}
+img{width:100%;border-radius:12px;margin-top:15px}
+select{width:100%;padding:12px;border-radius:8px;margin-top:12px}
+</style>
+</head>
+<body>
+<h1>AI Color Grading Studio</h1>
+<p>Professional Photo Color Grading</p>
+<div class="card">
+<h3>Import Foto</h3>
+<input type="file" id="file" accept="image/*">
+<img id="preview" style="display:none">
+<h3>Pilih Style Grading</h3>
+<select id="style">
+<option value="cinema">Cinematic</option>
+<option value="warm">Warm Film</option>
+<option value="cool">Cool Tone</option>
+<option value="vintage">Vintage</option>
+<option value="normal">Natural</option>
+</select>
+<button onclick="applyGrade()">Terapkan Grading</button>
+<button onclick="downloadImage()">Download Hasil</button>
+</div>
+<script>
+let img=document.getElementById('preview');
+let file=document.getElementById('file');
+file.onchange=e=>{
+let f=e.target.files[0];
+if(f){img.src=URL.createObjectURL(f);img.style.display='block';}
+};
+function applyGrade(){
+let s=document.getElementById('style').value;
+let filters={
+cinema:'contrast(1.2) saturate(1.15) sepia(.12)',
+warm:'saturate(1.3) sepia(.25)',
+cool:'contrast(1.1) saturate(.9) hue-rotate(12deg)',
+vintage:'sepia(.3) contrast(.9) saturate(.8)',
+normal:'none'
+};
+img.style.filter=filters[s];
+}
+function downloadImage(){
+if(!img.src){alert('Pilih foto dahulu');return;}
+let c=document.createElement('canvas');
+let x=c.getContext('2d');
+c.width=img.naturalWidth;c.height=img.naturalHeight;
+x.filter=getComputedStyle(img).filter;
+x.drawImage(img,0,0);
+let a=document.createElement('a');
+a.download='color-grading.jpg';
+a.href=c.toDataURL('image/jpeg',.95);
+a.click();
+}
+</script>
+</body>
+</html>
