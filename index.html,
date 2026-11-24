@@ -4,287 +4,307 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0c1019">
+<meta name="theme-color" content="#10131c">
 <title>AI Color Grading Studio PRO</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#0c1019;color:#f5f6fa;font-family:Arial,sans-serif}
-header{padding:24px 18px;background:linear-gradient(130deg,#202d50,#10131d);border-bottom:1px solid #293149}
-header h1{margin:0;color:#a9baff;font-size:25px}
-header p{color:#aab1c3;font-size:13px;margin:9px 0 0}
-main{max-width:1050px;margin:auto;padding:18px}
-.card{background:#151b29;border:1px solid #293247;border-radius:16px;padding:17px;margin-bottom:16px}
-h2{font-size:17px;margin:0 0 14px}
-.small{font-size:12px;color:#aeb7ca;line-height:1.6}
-.uploads{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.upload{border:1px dashed #53617f;border-radius:12px;padding:13px;background:#101622}
-.upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:10px}
-input[type=file]{width:100%;font-size:12px;color:#bdc6d8}
-.preview{width:100%;height:190px;object-fit:contain;background:#090d14;border-radius:9px;margin-top:10px}
-button{border:0;border-radius:10px;padding:13px 16px;font-weight:bold;cursor:pointer}
-.primary{background:#8198ff;color:#101525;width:100%;margin-top:14px}
-.secondary{background:#29354f;color:white}
-button:disabled{opacity:.45}
-.status{font-size:13px;line-height:1.6;color:#b8c5e7;margin-top:12px;white-space:pre-wrap}
-.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.result-grid img{width:100%;height:230px;object-fit:contain;background:#090d14;border-radius:10px}
-.result-grid b{display:block;font-size:12px;margin-bottom:8px;color:#b9c6e8}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}
-.actions button{flex:1}
-.control{margin:14px 0}
-.control-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
-input[type=range]{width:100%;accent-color:#91a5ff}
-footer{text-align:center;color:#7e899f;font-size:11px;padding:18px}
-@media(max-width:580px){
- main{padding:12px}
- .uploads,.result-grid{grid-template-columns:1fr}
- .preview{height:210px}
- .result-grid img{height:240px}
+body{
+ margin:0;background:#10131c;color:#fff;
+ font-family:Arial,sans-serif;padding:18px
 }
+h1{font-size:25px;color:#a5b4fc;margin-bottom:5px}
+.sub{color:#9299aa;font-size:13px}
+.card{
+ background:#1b2130;padding:16px;
+ border:1px solid #30394d;border-radius:15px;
+ margin:15px 0
+}
+h3{font-size:16px;margin:0 0 13px}
+.upload{
+ display:block;background:#252e42;
+ border:1px dashed #65749b;border-radius:12px;
+ padding:18px;text-align:center;margin:10px 0;
+ color:#c7d2fe
+}
+input[type=file]{width:100%;font-size:12px;margin-top:10px}
+.preview{
+ display:grid;grid-template-columns:1fr 1fr;gap:10px
+}
+.preview img{
+ width:100%;aspect-ratio:1/1;object-fit:contain;
+ background:#0c1018;border-radius:10px
+}
+canvas{
+ width:100%;height:auto;border-radius:10px;
+ background:#0c1018
+}
+label{display:block;font-size:13px;color:#cbd5e1;margin:15px 0 6px}
+input[type=range]{width:100%;accent-color:#818cf8}
+button{
+ width:100%;padding:14px;border:0;border-radius:10px;
+ background:#6366f1;color:white;font-weight:bold;
+ font-size:14px;margin-top:10px
+}
+.secondary{background:#30394d}
+.value{float:right;color:#a5b4fc}
+.status{font-size:12px;color:#a5b4fc;margin-top:10px}
 </style>
 </head>
+
 <body>
-<header>
- <h1>AI Color Grading Studio PRO</h1>
- <p>AI Vision · Adaptive Color Matching · Professional Studio</p>
-</header>
-<main>
-<section class="card">
-<h2>01 — INPUT FOTO</h2>
-<div class="uploads">
- <div class="upload">
-  <label>FOTO ASLI</label>
-  <input id="sourceFile" type="file" accept="image/*">
-  <img id="sourcePreview" class="preview" alt="Foto asli">
- </div>
- <div class="upload">
-  <label>FOTO REFERENSI</label>
-  <input id="referenceFile" type="file" accept="image/*">
-  <img id="referencePreview" class="preview" alt="Foto referensi">
- </div>
+
+<h1>AI COLOR GRADING PRO</h1>
+<div class="sub">Professional Reference Color Matching Studio</div>
+
+<div class="card">
+<h3>01. Foto Utama</h3>
+<div class="upload">
+Pilih foto yang ingin diedit
+<input type="file" id="mainFile" accept="image/*">
 </div>
-<p class="small">Pilih foto yang ingin diedit dan foto referensi sebagai target gaya warna.</p>
-<button class="primary" id="analyzeBtn">ANALISIS DENGAN AI VISION</button>
+</div>
+
+<div class="card">
+<h3>02. Foto Referensi</h3>
+<div class="upload">
+Pilih foto sebagai acuan warna
+<input type="file" id="refFile" accept="image/*">
+</div>
+</div>
+
+<div class="card">
+<h3>03. Preview Foto</h3>
+<div class="preview">
+<div>
+<div class="sub">FOTO ASLI</div>
+<img id="originalPreview">
+</div>
+<div>
+<div class="sub">REFERENSI</div>
+<img id="referencePreview">
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>04. AI Color Matching</h3>
+<canvas id="result"></canvas>
 <div class="status" id="status">Menunggu foto...</div>
-</section>
-
-<section class="card">
-<h2>02 — HASIL GRADING</h2>
-<div class="result-grid">
- <div><b>BEFORE</b><img id="beforeImage" alt="Sebelum"></div>
- <div><b>AFTER</b><img id="afterImage" alt="Sesudah"></div>
+<button onclick="autoMatch()">AUTO COLOR MATCH</button>
 </div>
-<div class="actions">
- <button class="secondary" id="offlineBtn">GRADING OFFLINE</button>
- <button class="secondary" id="downloadBtn">DOWNLOAD FOTO</button>
-</div>
-</section>
 
-<section class="card">
-<h2>03 — COLOR CONTROL</h2>
+<div class="card">
+<h3>05. Manual Adjustment</h3>
+
 <div id="controls"></div>
-<button class="primary" id="applyBtn">TERAPKAN GRADING</button>
-</section>
 
-<section class="card">
-<h2>04 — AI SERVER</h2>
-<p class="small">Masukkan URL Cloudflare Worker setelah backend AI selesai dipasang. API Key tidak boleh dimasukkan ke website.</p>
-<input id="workerUrl" type="url" placeholder="https://nama-worker.workers.dev" style="width:100%;padding:13px;border-radius:8px;border:1px solid #46516b;background:#0d1320;color:white">
-<button class="primary" id="saveWorker">SIMPAN SERVER</button>
-</section>
-<canvas id="canvas" hidden></canvas>
-</main>
-<footer>AI COLOR GRADING STUDIO PRO · DEVELOPMENT EDITION</footer>
+<button onclick="applyGrade()">TERAPKAN PENGATURAN</button>
+<button class="secondary" onclick="resetGrade()">RESET</button>
+</div>
+
+<div class="card">
+<h3>06. Export</h3>
+<button onclick="downloadImage()">DOWNLOAD HASIL JPG</button>
+</div>
 
 <script>
-const $=id=>document.getElementById(id);
-let source=null,reference=null,ready=false;
-let params={
- exposureEV:0,contrast:1,saturation:1,temperature:0,
- tint:0,highlights:0,shadows:0,vibrance:0,fade:0
+const $ = id => document.getElementById(id);
+
+let mainImage=null;
+let refImage=null;
+let originalData=null;
+let referenceStats=null;
+
+const settings={
+ exposure:0,
+ contrast:0,
+ saturation:0,
+ temperature:0,
+ shadows:0
 };
 
-const fields=[
- ["exposureEV","Exposure",-2,2,.05],
- ["contrast","Contrast",.7,1.5,.01],
- ["saturation","Saturation",.5,1.6,.01],
- ["temperature","Temperature",-30,30,1],
- ["tint","Tint",-15,15,1],
- ["highlights","Highlights",-40,40,1],
- ["shadows","Shadows",-40,40,1],
- ["vibrance","Vibrance",-.3,.4,.01],
- ["fade","Fade",0,.12,.005]
+const controls=[
+ ["exposure","Exposure",-100,100],
+ ["contrast","Contrast",-100,100],
+ ["saturation","Saturation",-100,100],
+ ["temperature","Temperature",-100,100],
+ ["shadows","Shadows",-100,100]
 ];
 
-function status(t){$("status").textContent=t}
-function load(file){
- return new Promise((resolve,reject)=>{
-  const url=URL.createObjectURL(file);
-  const img=new Image();
-  img.onload=()=>resolve({img,url});
-  img.onerror=()=>reject(Error("Foto gagal dibuka"));
-  img.src=url;
+$("controls").innerHTML=controls.map(c=>`
+<label>${c[1]} <span class="value" id="${c[0]}Value">0</span></label>
+<input type="range" id="${c[0]}" min="${c[2]}" max="${c[3]}" value="0">
+`).join("");
+
+controls.forEach(c=>{
+ $(c[0]).addEventListener("input",e=>{
+ settings[c[0]]=Number(e.target.value);
+ $(c[0]+"Value").textContent=e.target.value;
  });
-}
+});
 
-$("sourceFile").onchange=async e=>{
- if(!e.target.files[0])return;
- try{
-  const x=await load(e.target.files[0]);
-  source=x.img;
-  $("sourcePreview").src=x.url;
-  $("beforeImage").src=x.url;
-  ready=false;
-  status("Foto asli berhasil dimuat.");
- }catch(e){status(e.message)}
-};
-
-$("referenceFile").onchange=async e=>{
- if(!e.target.files[0])return;
- try{
-  const x=await load(e.target.files[0]);
-  reference=x.img;
-  $("referencePreview").src=x.url;
-  status("Foto referensi berhasil dimuat.");
- }catch(e){status(e.message)}
-};
-
-function buildControls(){
- $("controls").innerHTML=fields.map(([k,n,min,max,step])=>`
- <div class="control">
- <div class="control-top"><label>${n}</label><span id="${k}Val">${params[k]}</span></div>
- <input id="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${params[k]}">
- </div>`).join("");
- fields.forEach(([k])=>{
-  $(k).oninput=()=>{
-   params[k]=Number($(k).value);
-   $(k+"Val").textContent=params[k];
-  };
- });
-}
-buildControls();
-
-function updateControls(){
- fields.forEach(([k])=>{
-  $(k).value=params[k];
-  $(k+"Val").textContent=params[k];
- });
-}
-
-function clamp(v){return Math.max(0,Math.min(255,v))}
-
-function grade(){
- if(!source){status("Pilih foto asli terlebih dahulu.");return}
- const c=$("canvas"),ctx=c.getContext("2d",{willReadFrequently:true});
- c.width=source.naturalWidth;
- c.height=source.naturalHeight;
- ctx.drawImage(source,0,0);
- const frame=ctx.getImageData(0,0,c.width,c.height);
- const d=frame.data;
- const exposure=2**params.exposureEV;
-
- for(let i=0;i<d.length;i+=4){
-  const originalR=d[i],originalG=d[i+1],originalB=d[i+2];
-  let r=originalR*exposure;
-  let g=originalG*exposure;
-  let b=originalB*exposure;
-
-  r=(r-128)*params.contrast+128;
-  g=(g-128)*params.contrast+128;
-  b=(b-128)*params.contrast+128;
-
-  const lum=.2126*r+.7152*g+.0722*b;
-  const shadow=1-lum/255,highlight=lum/255;
-  const tone=(params.shadows*shadow+params.highlights*highlight)*.55;
-  r+=tone;g+=tone;b+=tone;
-
-  r+=params.temperature+params.tint*.35;
-  b-=params.temperature-params.tint*.35;
-  g-=params.tint*.3;
-
-  const gray=.2126*r+.7152*g+.0722*b;
-  const chroma=Math.max(r,g,b)-Math.min(r,g,b);
-  const sat=params.saturation*(1+params.vibrance*(1-chroma/255));
-  r=gray+(r-gray)*sat;
-  g=gray+(g-gray)*sat;
-  b=gray+(b-gray)*sat;
-
-  r=r*(1-params.fade)+127.5*params.fade;
-  g=g*(1-params.fade)+127.5*params.fade;
-  b=b*(1-params.fade)+127.5*params.fade;
-
-  d[i]=clamp(r);d[i+1]=clamp(g);d[i+2]=clamp(b);
- }
- ctx.putImageData(frame,0,0);
- $("afterImage").src=c.toDataURL("image/jpeg",.95);
- ready=true;
- status("Grading selesai. Periksa hasil BEFORE dan AFTER.");
-}
-
-$("applyBtn").onclick=grade;
-$("offlineBtn").onclick=()=>{
- if(!source){status("Pilih foto asli terlebih dahulu.");return}
- params={
- exposureEV:.15,contrast:1.12,saturation:1.08,
- temperature:5,tint:0,highlights:-8,shadows:10,
- vibrance:.12,fade:.015
+function loadImage(file,callback){
+ if(!file)return;
+ const img=new Image();
+ const url=URL.createObjectURL(file);
+ img.onload=()=>{
+ callback(img);
+ URL.revokeObjectURL(url);
  };
- updateControls();
- grade();
- status("Grading offline selesai. Ini penyesuaian dasar, bukan analisis AI.");
-};
-
-function smallImage(img){
- const scale=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight));
- const c=document.createElement("canvas");
- c.width=Math.round(img.naturalWidth*scale);
- c.height=Math.round(img.naturalHeight*scale);
- c.getContext("2d").drawImage(img,0,0,c.width,c.height);
- return c.toDataURL("image/jpeg",.8).split(",")[1];
+ img.src=url;
 }
 
-$("analyzeBtn").onclick=async()=>{
- if(!source||!reference){status("Pilih kedua foto terlebih dahulu.");return}
- const endpoint=$("workerUrl").value.trim()||localStorage.getItem("AI_WORKER");
- if(!endpoint){status("Masukkan URL AI Server terlebih dahulu.");return}
- $("analyzeBtn").disabled=true;
- status("AI Vision sedang menganalisis foto...");
- try{
-  const response=await fetch(endpoint.replace(/\/$/,"")+"/analyze",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({
-    source:smallImage(source),
-    reference:smallImage(reference)
-   })
-  });
-  const result=await response.json();
-  if(!response.ok)throw Error(result.error||"AI server gagal.");
-  params=result.parameters;
-  updateControls();
-  grade();
-  status("Analisis AI berhasil. Parameter grading sudah diterapkan.");
- }catch(e){status("Gagal: "+e.message)}
- finally{$("analyzeBtn").disabled=false}
+$("mainFile").onchange=e=>{
+ loadImage(e.target.files[0],img=>{
+ mainImage=img;
+ $("originalPreview").src=img.src;
+ originalData=getImageData(img);
+ $("status").textContent="Foto utama berhasil dimuat.";
+ drawOriginal();
+ });
 };
 
-$("saveWorker").onclick=()=>{
- const value=$("workerUrl").value.trim();
- if(!value.startsWith("https://")){
-  status("Masukkan URL HTTPS yang benar.");
-  return;
+$("refFile").onchange=e=>{
+ loadImage(e.target.files[0],img=>{
+ refImage=img;
+ $("referencePreview").src=img.src;
+ referenceStats=getStats(getImageData(img));
+ $("status").textContent="Foto referensi berhasil dimuat.";
+ });
+};
+
+function getImageData(img){
+ const c=document.createElement("canvas");
+ const ctx=c.getContext("2d");
+ c.width=img.naturalWidth;
+ c.height=img.naturalHeight;
+ ctx.drawImage(img,0,0);
+ return ctx.getImageData(0,0,c.width,c.height);
+}
+
+function getStats(data){
+ const sums=[0,0,0];
+ const squares=[0,0,0];
+ const count=data.data.length/4;
+ for(let i=0;i<data.data.length;i+=4){
+ for(let c=0;c<3;c++){
+ const v=data.data[i+c];
+ sums[c]+=v;
+ squares[c]+=v*v;
  }
- localStorage.setItem("AI_WORKER",value);
- status("Alamat AI Server disimpan.");
-};
+ }
+ return {
+ mean:sums.map(v=>v/count),
+ std:squares.map((v,i)=>Math.sqrt(Math.max(0,v/count-(sums[i]/count)**2)))
+ };
+}
 
-$("downloadBtn").onclick=()=>{
- if(!ready){status("Belum ada hasil grading.");return}
- const a=document.createElement("a");
- a.href=$("afterImage").src;
- a.download="AI-Color-Grading-PRO.jpg";
- a.click();
-};
+function drawOriginal(){
+ if(!originalData)return;
+ const canvas=$("result");
+ canvas.width=originalData.width;
+ canvas.height=originalData.height;
+ canvas.getContext("2d").putImageData(originalData,0,0);
+}
+
+function autoMatch(){
+ if(!mainImage||!refImage){
+ alert("Pilih foto utama dan foto referensi terlebih dahulu.");
+ return;
+ }
+
+ referenceStats=getStats(getImageData(refImage));
+ applyGrade(true);
+ $("status").textContent=
+ "Pencocokan warna otomatis selesai.";
+}
+
+function applyGrade(auto=false){
+ if(!originalData){
+ alert("Pilih foto utama terlebih dahulu.");
+ return;
+ }
+
+ const canvas=$("result");
+ canvas.width=originalData.width;
+ canvas.height=originalData.height;
+
+ const ctx=canvas.getContext("2d");
+ const output=ctx.createImageData(
+ originalData.width,originalData.height
+ );
+
+ const source=originalData.data;
+ const target=output.data;
+
+ const sourceStats=getStats(originalData);
+
+ const match=auto&&referenceStats;
+
+ const contrast=1+settings.contrast/100;
+ const exposure=Math.pow(2,settings.exposure/50);
+ const saturation=1+settings.saturation/100;
+ const temp=settings.temperature;
+ const shadows=settings.shadows;
+
+ for(let i=0;i<source.length;i+=4){
+ let rgb=[source[i],source[i+1],source[i+2]];
+
+ if(match){
+ rgb=rgb.map((v,c)=>{
+ const std=sourceStats.std[c]||1;
+ return (v-sourceStats.mean[c])*
+ (referenceStats.std[c]/std)+referenceStats.mean[c];
+ });
+ }
+
+ rgb=rgb.map(v=>(v-128)*contrast+128);
+ rgb=rgb.map(v=>v*exposure);
+
+ const gray=rgb[0]*.299+rgb[1]*.587+rgb[2]*.114;
+
+ rgb=rgb.map(v=>gray+(v-gray)*saturation);
+
+ const shadowFactor=1-gray/255;
+ rgb[0]+=temp*0.65;
+ rgb[1]+=temp*0.08;
+ rgb[2]-=temp*0.65;
+
+ rgb=rgb.map(v=>v+shadows*shadowFactor);
+
+ target[i]=Math.max(0,Math.min(255,rgb[0]));
+ target[i+1]=Math.max(0,Math.min(255,rgb[1]));
+ target[i+2]=Math.max(0,Math.min(255,rgb[2]));
+ target[i+3]=source[i+3];
+ }
+
+ ctx.putImageData(output,0,0);
+ $("status").textContent="Grading berhasil diterapkan.";
+}
+
+function resetGrade(){
+ controls.forEach(c=>{
+ settings[c[0]]=0;
+ $(c[0]).value=0;
+ $(c[0]+"Value").textContent="0";
+ });
+ drawOriginal();
+ $("status").textContent="Pengaturan direset.";
+}
+
+function downloadImage(){
+ const canvas=$("result");
+ if(!mainImage){
+ alert("Belum ada foto untuk diunduh.");
+ return;
+ }
+ const link=document.createElement("a");
+ link.download="AI-Color-Grading-PRO.jpg";
+ link.href=canvas.toDataURL("image/jpeg",0.95);
+ link.click();
+}
 </script>
+
 </body>
 </html>
