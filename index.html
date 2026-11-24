@@ -1,442 +1,426 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101522">
-<title>AI Color Grading Studio PRO</title>
-
-<style>
-*{box-sizing:border-box}
-body{
- margin:0;background:#101522;color:#f5f6fa;
- font-family:Arial,sans-serif;padding:18px;
-}
-header{padding:12px 0 20px}
-h1{font-size:25px;color:#9aaaff;margin:0 0 8px}
-.sub{color:#9ba6ba;font-size:13px}
-.card{
- background:#1b2434;padding:17px;border-radius:16px;
- margin-bottom:17px;border:1px solid #303b50;
-}
-h3{font-size:16px;margin:4px 0 14px}
-label{display:block;font-size:13px;color:#c4cce0;margin-top:15px}
-input[type=file],select{
- width:100%;margin-top:10px;padding:11px;
- background:#111a29;color:white;border:1px solid #39465e;
- border-radius:9px;
-}
-input[type=range]{width:100%;accent-color:#8495ff;margin-top:10px}
-button{
- border:0;border-radius:10px;padding:13px;
- font-weight:bold;cursor:pointer;font-size:14px;
-}
-.primary{background:#7187ff;color:white;width:100%;margin-top:12px}
-.secondary{background:#303d55;color:white;width:100%;margin-top:10px}
-.success{background:#187b63;color:white;width:100%;margin-top:10px}
-button:active{opacity:.8}
-.status{
- background:#111a29;padding:12px;border-radius:9px;
- color:#9daeff;font-size:12px;margin-top:12px;
-}
-.images{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.preview{
- width:100%;aspect-ratio:4/3;object-fit:contain;
- background:#0b101a;border-radius:10px;
-}
-canvas{width:100%;height:auto;background:#0b101a;border-radius:10px}
-.small{font-size:11px;color:#9ba6ba;text-align:center;margin-top:7px}
-.value{float:right;color:#9aaaff}
-hr{border:0;border-top:1px solid #344056;margin:17px 0}
-.footer{text-align:center;color:#758198;font-size:11px;padding:12px}
-.hidden{display:none}
-</style>
-</head>
-
-<body>
-
-<header>
- <h1>AI COLOR GRADING PRO</h1>
- <div class="sub">Professional Reference Color Matching Studio</div>
-</header>
-
-<div class="card">
- <h3>01. Mode Pemrosesan</h3>
- <select id="mode">
-  <option value="offline">Offline Processing</option>
-  <option value="online">Online AI Integration</option>
- </select>
- <div class="status" id="status">
-  Offline aktif. Foto diproses langsung di perangkat.
- </div>
-</div>
-
-<div class="card">
- <h3>02. Foto Utama</h3>
- <input type="file" id="mainFile" accept="image/*">
- <img id="mainPreview" class="preview hidden">
- <div class="small">Foto yang ingin kamu edit</div>
-
- <hr>
-
- <h3>03. Foto Referensi</h3>
- <input type="file" id="refFile" accept="image/*">
- <img id="refPreview" class="preview hidden">
- <div class="small">Foto yang menjadi acuan warna</div>
-</div>
-
-<div class="card">
- <h3>04. Pengaturan AI</h3>
-
- <label>Reference Matching
- <span class="value" id="matchVal">75%</span></label>
- <input type="range" id="match" min="0" max="100" value="75">
-
- <label>Exposure
- <span class="value" id="exposureVal">0</span></label>
- <input type="range" id="exposure" min="-100" max="100" value="0">
-
- <label>Contrast
- <span class="value" id="contrastVal">0</span></label>
- <input type="range" id="contrast" min="-100" max="100" value="0">
-
- <label>Highlights
- <span class="value" id="highlightsVal">0</span></label>
- <input type="range" id="highlights" min="-100" max="100" value="0">
-
- <label>Shadows
- <span class="value" id="shadowsVal">0</span></label>
- <input type="range" id="shadows" min="-100" max="100" value="0">
-
- <label>Temperature
- <span class="value" id="temperatureVal">0</span></label>
- <input type="range" id="temperature" min="-100" max="100" value="0">
-
- <label>Saturation
- <span class="value" id="saturationVal">0</span></label>
- <input type="range" id="saturation" min="-100" max="100" value="0">
-
- <label>Color Intensity
- <span class="value" id="intensityVal">100%</span></label>
- <input type="range" id="intensity" min="0" max="200" value="100">
-
- <button class="primary" id="apply">ANALISIS & TERAPKAN GRADING</button>
- <button class="secondary" id="reset">RESET PENGATURAN</button>
-</div>
-
-<div class="card">
- <h3>05. Before & After</h3>
- <div class="images">
-  <div>
-   <canvas id="before"></canvas>
-   <div class="small">ORIGINAL</div>
-  </div>
-  <div>
-   <canvas id="after"></canvas>
-   <div class="small">GRADED</div>
-  </div>
- </div>
- <button class="success" id="download">DOWNLOAD HASIL FOTO</button>
- <div class="status" id="resultStatus">
-  Belum ada hasil grading.
- </div>
-</div>
-
-<div class="footer">
- AI COLOR GRADING STUDIO PRO · Local Image Processing
-</div>
-
-<script>
-const $ = id => document.getElementById(id);
-
 let mainImage = null;
 let refImage = null;
 let originalData = null;
 let referenceStats = null;
 let busy = false;
 
+const $ = id => document.getElementById(id);
+
 const ids = [
- "match","exposure","contrast","highlights",
- "shadows","temperature","saturation","intensity"
+  "match", "exposure", "contrast", "highlights",
+  "shadows", "temperature", "saturation", "intensity"
 ];
 
-ids.forEach(id=>{
- const el=$(id);
- el.addEventListener("input",()=>{
-  $(id+"Val").textContent =
-   id==="match" || id==="intensity"
-    ? el.value+"%"
-    : el.value;
- });
+// Slider dan angka
+ids.forEach(id => {
+  $(id).addEventListener("input", () => {
+    $(id + "Val").textContent =
+      id === "match" || id === "intensity"
+        ? $(id).value + "%"
+        : $(id).value;
+  });
 });
 
-function loadImage(file){
- return new Promise((resolve,reject)=>{
-  const url=URL.createObjectURL(file);
-  const image=new Image();
-  image.onload=()=>{
-   URL.revokeObjectURL(url);
-   resolve(image);
-  };
-  image.onerror=()=>{
-   URL.revokeObjectURL(url);
-   reject(new Error("Gagal membaca gambar"));
-  };
-  image.src=url;
- });
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Gagal membaca foto"));
+    };
+
+    image.src = url;
+  });
 }
 
-function makeCanvas(image){
- const canvas=document.createElement("canvas");
- canvas.width=image.naturalWidth;
- canvas.height=image.naturalHeight;
- const ctx=canvas.getContext("2d",{willReadFrequently:true});
- ctx.drawImage(image,0,0);
- return {canvas,ctx};
-}
+// Memuat foto utama
+$("mainFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-$("mainFile").addEventListener("change",async e=>{
- const file=e.target.files[0];
- if(!file)return;
- try{
-  mainImage=await loadImage(file);
-  $("mainPreview").src=mainImage.src;
-  $("mainPreview").classList.remove("hidden");
+  try {
+    mainImage = await loadImage(file);
 
-  const {canvas,ctx}=makeCanvas(mainImage);
-  originalData=ctx.getImageData(
-   0,0,canvas.width,canvas.height
+    $("mainPreview").src = mainImage.src;
+    $("mainPreview").classList.remove("hidden");
+
+    const c = document.createElement("canvas");
+    c.width = mainImage.naturalWidth;
+    c.height = mainImage.naturalHeight;
+
+    const ctx = c.getContext("2d", {
+      willReadFrequently: true
+    });
+
+    ctx.drawImage(mainImage, 0, 0);
+
+    originalData = ctx.getImageData(
+      0, 0, c.width, c.height
+    );
+
+    ["before", "after"].forEach(id => {
+      $(id).width = c.width;
+      $(id).height = c.height;
+    });
+
+    $("before").getContext("2d").putImageData(
+      originalData, 0, 0
+    );
+
+    $("after").getContext("2d").putImageData(
+      originalData, 0, 0
+    );
+
+    $("resultStatus").textContent =
+      "Foto utama siap diproses.";
+
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+// Menganalisis distribusi warna foto referensi
+function analyzeImage(image) {
+  const w = 256;
+  const h = Math.max(
+    1,
+    Math.round(image.naturalHeight * w / image.naturalWidth)
   );
 
-  $("before").width=canvas.width;
-  $("before").height=canvas.height;
-  $("after").width=canvas.width;
-  $("after").height=canvas.height;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
 
-  $("before").getContext("2d").drawImage(canvas,0,0);
-  $("after").getContext("2d").drawImage(canvas,0,0);
+  const ctx = c.getContext("2d", {
+    willReadFrequently: true
+  });
 
-  $("resultStatus").textContent="Foto utama berhasil dimuat.";
- }catch(err){alert(err.message);}
-});
+  ctx.drawImage(image, 0, 0, w, h);
 
-$("refFile").addEventListener("change",async e=>{
- const file=e.target.files[0];
- if(!file)return;
- try{
-  refImage=await loadImage(file);
-  $("refPreview").src=refImage.src;
-  $("refPreview").classList.remove("hidden");
-  referenceStats=analyzeImage(refImage);
-  $("resultStatus").textContent=
-   "Referensi berhasil dianalisis. Siap melakukan matching.";
- }catch(err){alert(err.message);}
-});
+  const pixels = ctx.getImageData(
+    0, 0, w, h
+  ).data;
 
-// Mengambil rata-rata warna dan standar deviasi foto.
-function analyzeImage(image){
- const {canvas,ctx}=makeCanvas(image);
+  const hist = [[], [], []];
 
- const w=Math.min(256,canvas.width);
- const h=Math.max(1,Math.round(canvas.height*w/canvas.width));
-
- const temp=document.createElement("canvas");
- temp.width=w;temp.height=h;
- const t=temp.getContext("2d",{willReadFrequently:true});
- t.drawImage(canvas,0,0,w,h);
-
- const data=t.getImageData(0,0,w,h).data;
- let sum=[0,0,0],sq=[0,0,0],count=0;
-
- for(let i=0;i<data.length;i+=4){
-  for(let c=0;c<3;c++){
-   sum[c]+=data[i+c];
-   sq[c]+=data[i+c]*data[i+c];
-  }
-  count++;
- }
-
- const mean=sum.map(v=>v/count);
- const std=sq.map((v,c)=>
-  Math.sqrt(Math.max(1,v/count-mean[c]*mean[c]))
- );
-
- return {mean,std};
-}
-
-function clamp(v){
- return Math.max(0,Math.min(255,v));
-}
-
-function getSettings(){
- return {
-  match:+$("match").value/100,
-  exposure:+$("exposure").value/100,
-  contrast:+$("contrast").value/100,
-  highlights:+$("highlights").value/100,
-  shadows:+$("shadows").value/100,
-  temperature:+$("temperature").value/100,
-  saturation:+$("saturation").value/100,
-  intensity:+$("intensity").value/100
- };
-}
-
-function processImage(){
- if(!originalData)return;
-
- const settings=getSettings();
- const {data}=originalData;
-
- const output=new ImageData(
-  new Uint8ClampedArray(data),
-  originalData.width,
-  originalData.height
- );
-
- const out=output.data;
- const match=referenceStats?settings.match:0;
-
- for(let i=0;i<out.length;i+=4){
-  let r=data[i],g=data[i+1],b=data[i+2];
-
-  // Reference color transfer
-  if(referenceStats && match>0){
-   const colors=[r,g,b];
-
-   for(let c=0;c<3;c++){
-    const mapped=
-     (colors[c]-128)*
-     (referenceStats.std[c]/125)+
-     referenceStats.mean[c];
-
-    colors[c]=colors[c]*(1-match)+mapped*match;
-   }
-
-   r=colors[0];g=colors[1];b=colors[2];
+  for (let ch = 0; ch < 3; ch++) {
+    hist[ch] = new Uint32Array(256);
   }
 
-  // Exposure
-  const exposure=Math.pow(2,settings.exposure);
-  r*=exposure;g*=exposure;b*=exposure;
+  let count = 0;
 
-  // Temperature
-  r+=settings.temperature*22;
-  b-=settings.temperature*22;
+  for (let i = 0; i < pixels.length; i += 4) {
+    for (let ch = 0; ch < 3; ch++) {
+      hist[ch][pixels[i + ch]]++;
+    }
+    count++;
+  }
 
-  // Contrast
-  const contrast=1+settings.contrast*.8;
-  r=(r-128)*contrast+128;
-  g=(g-128)*contrast+128;
-  b=(b-128)*contrast+128;
+  const cdf = [];
 
-  // Highlights and shadows
-  const lum=(r+g+b)/3;
-  const shadow=(1-lum/255);
-  const highlight=lum/255;
+  for (let ch = 0; ch < 3; ch++) {
+    cdf[ch] = new Float32Array(256);
 
-  const shadowChange=settings.shadows*65*shadow;
-  const highlightChange=settings.highlights*65*highlight;
+    let sum = 0;
 
-  r+=shadowChange+highlightChange;
-  g+=shadowChange+highlightChange;
-  b+=shadowChange+highlightChange;
+    for (let v = 0; v < 256; v++) {
+      sum += hist[ch][v];
+      cdf[ch][v] = sum / count;
+    }
+  }
 
-  // Saturation
-  const gray=.299*r+.587*g+.114*b;
-  const sat=1+settings.saturation;
-  r=gray+(r-gray)*sat;
-  g=gray+(g-gray)*sat;
-  b=gray+(b-gray)*sat;
-
-  // Overall intensity
-  const original=[data[i],data[i+1],data[i+2]];
-  r=original[0]+(r-original[0])*settings.intensity;
-  g=original[1]+(g-original[1])*settings.intensity;
-  b=original[2]+(b-original[2])*settings.intensity;
-
-  out[i]=clamp(r);
-  out[i+1]=clamp(g);
-  out[i+2]=clamp(b);
-  out[i+3]=data[i+3];
- }
-
- $("after").getContext("2d").putImageData(output,0,0);
-
- $("resultStatus").textContent=
-  "Grading selesai. Resolusi: "+
-  originalData.width+" × "+originalData.height;
+  return { cdf };
 }
 
-$("apply").addEventListener("click",async()=>{
- if(!mainImage){
-  alert("Masukkan foto utama dahulu.");
-  return;
- }
- if(busy)return;
- busy=true;
- $("apply").disabled=true;
- $("apply").textContent="MEMPROSES...";
+// Membuat peta warna berdasarkan histogram foto utama
+// dan histogram foto referensi
+function createColorMaps(source, reference) {
+  const hist = [
+    new Uint32Array(256),
+    new Uint32Array(256),
+    new Uint32Array(256)
+  ];
 
- try{
-  if($("mode").value==="online"){
-   $("status").textContent=
-    "Online dipilih. Belum ada server AI terhubung; menggunakan mesin lokal.";
-  }else{
-   $("status").textContent="Memproses foto secara offline...";
+  const data = source.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    for (let ch = 0; ch < 3; ch++) {
+      hist[ch][data[i + ch]]++;
+    }
   }
 
-  await new Promise(resolve=>setTimeout(resolve,30));
-  processImage();
+  const count = data.length / 4;
+  const maps = [];
 
-  $("status").textContent=
-   "Pemrosesan lokal berhasil. Foto tidak perlu diunggah ke server.";
- }catch(err){
-  alert("Terjadi kesalahan: "+err.message);
- }finally{
-  busy=false;
-  $("apply").disabled=false;
-  $("apply").textContent="ANALISIS & TERAPKAN GRADING";
- }
-});
+  for (let ch = 0; ch < 3; ch++) {
+    const srcCDF = new Float32Array(256);
+    let sum = 0;
 
-$("reset").addEventListener("click",()=>{
- const defaults={
-  match:75,exposure:0,contrast:0,highlights:0,
-  shadows:0,temperature:0,saturation:0,intensity:100
- };
+    for (let v = 0; v < 256; v++) {
+      sum += hist[ch][v];
+      srcCDF[v] = sum / count;
+    }
 
- Object.entries(defaults).forEach(([id,value])=>{
-  $(id).value=value;
-  $(id).dispatchEvent(new Event("input"));
- });
+    const map = new Uint8Array(256);
+    let target = 0;
 
- if(originalData){
-  $("after").getContext("2d").putImageData(originalData,0,0);
-  $("resultStatus").textContent="Pengaturan dikembalikan.";
- }
-});
+    for (let v = 0; v < 256; v++) {
+      const percentile = srcCDF[v];
 
-$("download").addEventListener("click",()=>{
- if(!mainImage){
-  alert("Masukkan foto terlebih dahulu.");
-  return;
- }
+      while (
+        target < 255 &&
+        reference.cdf[ch][target] < percentile
+      ) {
+        target++;
+      }
 
- $("after").toBlob(blob=>{
-  if(!blob){
-   alert("Gagal membuat file.");
-   return;
+      map[v] = target;
+    }
+
+    maps.push(map);
   }
 
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="AI-Color-Grading-PRO.jpg";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
- },"image/jpeg",.98);
+  return maps;
+}
+
+function clamp(v) {
+  return Math.max(0, Math.min(255, v));
+}
+
+function getSettings() {
+  return {
+    match: +$("match").value / 100,
+    exposure: +$("exposure").value / 100,
+    contrast: +$("contrast").value / 100,
+    highlights: +$("highlights").value / 100,
+    shadows: +$("shadows").value / 100,
+    temperature: +$("temperature").value / 100,
+    saturation: +$("saturation").value / 100,
+    intensity: +$("intensity").value / 100
+  };
+}
+
+// Mesin grading baru
+function processImage() {
+  if (!originalData) return;
+
+  const settings = getSettings();
+  const input = originalData.data;
+
+  const output = new ImageData(
+    new Uint8ClampedArray(input),
+    originalData.width,
+    originalData.height
+  );
+
+  const out = output.data;
+
+  // Histogram matching
+  const maps = referenceStats
+    ? createColorMaps(originalData, referenceStats)
+    : null;
+
+  const exposure = Math.pow(2, settings.exposure);
+  const contrast = 1 + settings.contrast * 0.8;
+  const match = maps ? settings.match : 0;
+
+  for (let i = 0; i < input.length; i += 4) {
+    const originalR = input[i];
+    const originalG = input[i + 1];
+    const originalB = input[i + 2];
+
+    let r = originalR;
+    let g = originalG;
+    let b = originalB;
+
+    // Reference matching
+    if (maps && match > 0) {
+      r = r * (1 - match) + maps[0][originalR] * match;
+      g = g * (1 - match) + maps[1][originalG] * match;
+      b = b * (1 - match) + maps[2][originalB] * match;
+    }
+
+    // Exposure
+    r *= exposure;
+    g *= exposure;
+    b *= exposure;
+
+    // White balance / temperature
+    r += settings.temperature * 30;
+    g += settings.temperature * 5;
+    b -= settings.temperature * 30;
+
+    // Contrast
+    r = (r - 128) * contrast + 128;
+    g = (g - 128) * contrast + 128;
+    b = (b - 128) * contrast + 128;
+
+    // Tonal correction
+    const lum = (
+      0.299 * r + 0.587 * g + 0.114 * b
+    );
+
+    const shadow = Math.pow(
+      1 - lum / 255, 1.5
+    );
+
+    const highlight = Math.pow(
+      lum / 255, 2
+    );
+
+    const tonal =
+      settings.shadows * 75 * shadow +
+      settings.highlights * 75 * highlight;
+
+    r += tonal;
+    g += tonal;
+    b += tonal;
+
+    // Saturation
+    const gray =
+      0.299 * r + 0.587 * g + 0.114 * b;
+
+    const sat = 1 + settings.saturation;
+
+    r = gray + (r - gray) * sat;
+    g = gray + (g - gray) * sat;
+    b = gray + (b - gray) * sat;
+
+    // Grading intensity
+    const amount = settings.intensity;
+
+    r = originalR + (r - originalR) * amount;
+    g = originalG + (g - originalG) * amount;
+    b = originalB + (b - originalB) * amount;
+
+    out[i] = clamp(r);
+    out[i + 1] = clamp(g);
+    out[i + 2] = clamp(b);
+    out[i + 3] = input[i + 3];
+  }
+
+  $("after").getContext("2d").putImageData(
+    output, 0, 0
+  );
+
+  $("resultStatus").textContent =
+    "Grading selesai: " +
+    originalData.width + " × " +
+    originalData.height +
+    " | Matching: " +
+    Math.round(match * 100) + "%";
+}
+
+// Memuat foto referensi
+$("refFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    refImage = await loadImage(file);
+
+    $("refPreview").src = refImage.src;
+    $("refPreview").classList.remove("hidden");
+
+    referenceStats = analyzeImage(refImage);
+
+    $("resultStatus").textContent =
+      "Referensi dianalisis. Siap melakukan color matching.";
+  } catch (err) {
+    alert(err.message);
+  }
 });
-</script>
-</body>
-</html>
+
+// Tombol grading
+$("apply").addEventListener("click", () => {
+  if (!originalData) {
+    alert("Pilih foto utama terlebih dahulu.");
+    return;
+  }
+
+  if (busy) return;
+
+  busy = true;
+  $("apply").disabled = true;
+  $("apply").textContent = "MEMPROSES FOTO...";
+
+  $("status").textContent =
+    $("mode").value === "online"
+      ? "Mode online dipilih. Mesin lokal digunakan karena server AI belum terhubung."
+      : "Memproses menggunakan mesin lokal offline.";
+
+  setTimeout(() => {
+    try {
+      processImage();
+    } catch (err) {
+      alert("Gagal memproses: " + err.message);
+    }
+
+    busy = false;
+    $("apply").disabled = false;
+    $("apply").textContent =
+      "ANALISIS & TERAPKAN GRADING";
+  }, 30);
+});
+
+// Reset
+$("reset").addEventListener("click", () => {
+  const defaults = {
+    match: 75,
+    exposure: 0,
+    contrast: 0,
+    highlights: 0,
+    shadows: 0,
+    temperature: 0,
+    saturation: 0,
+    intensity: 100
+  };
+
+  Object.entries(defaults).forEach(([id, value]) => {
+    $(id).value = value;
+    $(id).dispatchEvent(new Event("input"));
+  });
+
+  if (originalData) {
+    $("after").getContext("2d").putImageData(
+      originalData, 0, 0
+    );
+  }
+
+  $("resultStatus").textContent =
+    "Pengaturan berhasil direset.";
+});
+
+// Download resolusi asli
+$("download").addEventListener("click", () => {
+  if (!originalData) {
+    alert("Pilih foto terlebih dahulu.");
+    return;
+  }
+
+  $("after").toBlob(blob => {
+    if (!blob) {
+      alert("Gagal menyimpan foto.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "AI-Color-Grading-PRO.jpg";
+    a.click();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 2000);
+  }, "image/jpeg", 0.98);
+});
